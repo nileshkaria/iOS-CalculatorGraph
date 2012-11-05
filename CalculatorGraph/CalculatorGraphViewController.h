@@ -10,4 +10,8 @@
 
 @interface CalculatorGraphViewController : UIViewController
 
+//@property (nonatomic) NSMutableArray stack;
+
+@property (nonatomic, strong) id formula;
+
 @end
