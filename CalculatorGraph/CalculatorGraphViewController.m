@@ -22,12 +22,13 @@
 
 @synthesize graphView  = _graphView;
 @synthesize formula    = _formula; 
-
+@synthesize infix      = _infix;
+@synthesize display    = _display;
 
 //Redraw everytime data changes
 - (void) refreshGraphView
 {
-    if(!(self.formula && self.graphView))
+    if(!(self.formula && self.infix && self.graphView))
     {
         //@TODO - Remove later.
         //Clear user default settings
@@ -35,19 +36,21 @@
         return;
     }
     
-    //Get back description of program. Save the scale and axisOrigin for each formula in NSUserDefaults
-    NSString * formula = [CalculatorBrain descriptionOfProgram:[self.formula mutableCopy]];
+    //Get back description of program. Save the scale and axisOrigin for each equation in NSUserDefaults
+    NSString * infix = [CalculatorBrain descriptionOfProgram:[self.infix mutableCopy]];
     
-    NSLog(@"Formula %@", formula);
+    self.display.text = infix;
     
-    float scale = [[NSUserDefaults standardUserDefaults] floatForKey:[@"scale:" stringByAppendingString:formula]];
+    NSLog(@"Equation %@", infix );
+    
+    float scale = [[NSUserDefaults standardUserDefaults] floatForKey:[@"scale:" stringByAppendingString:infix]];
     
     if(scale)
         self.graphView.scale = scale;
     
-    float xAxisOrigin = [[NSUserDefaults standardUserDefaults] floatForKey:[@"x:" stringByAppendingString:formula]];
+    float xAxisOrigin = [[NSUserDefaults standardUserDefaults] floatForKey:[@"x:" stringByAppendingString:infix]];
     
-    float yAxisOrigin = [[NSUserDefaults standardUserDefaults] floatForKey:[@"y:" stringByAppendingString:formula]];
+    float yAxisOrigin = [[NSUserDefaults standardUserDefaults] floatForKey:[@"y:" stringByAppendingString:infix]];
     
     if(xAxisOrigin && yAxisOrigin)
     {
@@ -80,6 +83,12 @@
     }
 }
 
+- (void) setInfix:(id)infix
+{
+    //No need to redraw as we will redraw with change of formula
+    _infix = infix;
+}
+
 - (void) setGraphView:(CalculatorGraphView *)graphView
 {
     _graphView = graphView;
@@ -100,20 +109,24 @@
                         forGraphView: (CalculatorGraphView *)sender
 {
     // Here is where the calculator brains function executes the formula stack
-    double result = [CalculatorBrain runProgram:self.formula 
+    return [CalculatorBrain runProgram:self.formula 
                    usingVariableValues:[NSMutableDictionary 
-                                        dictionaryWithObject:[NSNumber numberWithFloat:variable] forKey:@"x"]];
-    
-    return result;
+                                        dictionaryWithObject:[NSNumber numberWithFloat:variable] forKey:@"x"]];    
+}
+
+-(NSMutableArray *) functionValuesForVariableArray:(NSMutableArray *)variables 
+                                      forGraphView:(CalculatorGraphView *)sender
+{
+    return [CalculatorBrain runProgram:self.formula usingRange:variables];
 }
 
 - (void)    storeScale: (float)scale  
           forGraphView: (CalculatorGraphView *)sender
 {
-    NSString * formula = [CalculatorBrain descriptionOfProgram:[self.formula mutableCopy]];
+    NSString * infix = [CalculatorBrain descriptionOfProgram:[self.infix mutableCopy]];
     
     //Save the scale passed from the view in NSUserDefaults
-    [[NSUserDefaults standardUserDefaults] setFloat:scale forKey:[@"scale:" stringByAppendingString:formula]];
+    [[NSUserDefaults standardUserDefaults] setFloat:scale forKey:[@"scale:" stringByAppendingString:infix]];
     
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
@@ -121,11 +134,11 @@
 - (void)    storeAxisOrigin: (CGPoint)axisOrigin    
                forGraphView: (CalculatorGraphView *) sender
 {
-    NSString * formula = [CalculatorBrain descriptionOfProgram:[self.formula mutableCopy]];
+    NSString * infix = [CalculatorBrain descriptionOfProgram:[self.infix mutableCopy]];
     
     //Save the axisOrigin passed from the view in NSUserDefaults
-    [[NSUserDefaults standardUserDefaults] setFloat:axisOrigin.x forKey:[@"x:" stringByAppendingString:formula]];
-    [[NSUserDefaults standardUserDefaults] setFloat:axisOrigin.y forKey:[@"y:" stringByAppendingString:formula]];
+    [[NSUserDefaults standardUserDefaults] setFloat:axisOrigin.x forKey:[@"x:" stringByAppendingString:infix]];
+    [[NSUserDefaults standardUserDefaults] setFloat:axisOrigin.y forKey:[@"y:" stringByAppendingString:infix]];
     
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
@@ -134,6 +147,21 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+
+//@TODO - Fix this.
+- (IBAction)resetUserDefaults 
+{
+    CGPoint axisOrigin;
+    axisOrigin.x = 0;
+    axisOrigin.y = 0;
+    
+    [self storeAxisOrigin:axisOrigin forGraphView:self.graphView];
+    
+    [self storeScale:0.0 forGraphView:self.graphView];
+
+    [self refreshGraphView];
 }
 
 /*

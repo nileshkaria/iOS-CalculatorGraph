@@ -203,25 +203,35 @@
 }
 
 + (NSString *) descriptionOfProgram:(NSMutableArray *)stack
-{     
-    if ([stack count]) 
+{
+    NSMutableArray * infixArray = [[NSMutableArray alloc] init];
+    
+    [CalculatorBrain    generateInfix:infixArray
+                      usingInfixStack:[stack mutableCopy]];
+    
+    if ([infixArray count]) 
     {
-        NSString * arrayString = @"";
-         
+        //Clear the infix stack so that we don't start the next
+        //display all over. 
+        [stack removeAllObjects];
+        [stack addObjectsFromArray:infixArray];
+        
+        NSString * infixArrayString = @"";
+        
         for(NSUInteger i = 0; i < [stack count]; ++i)
         {
-            //NSLog(@"Array value %@", (NSString *)[stack objectAtIndex:i]);
-             
-            arrayString = [[arrayString stringByAppendingString:@" "] stringByAppendingString:(NSString *)[stack objectAtIndex:i]];
+            //NSLog(@"Array value %@", (NSString *)[self.infixStack objectAtIndex:i]);
+            
+            infixArrayString = [[infixArrayString stringByAppendingString:@" "] stringByAppendingString:(NSString *)[stack objectAtIndex:i]];
         }
-         
+        
         //NSLog(@"Infix String = [%@]", infixArrayString);
-         
-        return arrayString;
-     }
-     
-     return nil;
- }
+        
+        return infixArrayString;
+    }
+    
+    return nil; 
+}
 
 //Add dictionaryWithObjectsAndKeys: for 3e
 + (BOOL) isVariable:(NSString *)operation
@@ -478,5 +488,31 @@
     return [self popOperandOffStack:stack];
 }
 
++ (NSMutableArray *) runProgram:(id)program 
+                     usingRange:(NSMutableArray *)variableValues
+{
+    NSMutableArray * resultValues = [[NSMutableArray alloc] init];
+    
+    if([program isKindOfClass:[NSArray class]])
+    {
+        for (NSUInteger i = 0; i < [variableValues count]; ++i) 
+        {
+            NSMutableArray * stack = [program mutableCopy];
+            
+            for (NSUInteger j = 0; j < [stack count]; ++j) 
+            {
+                if([[stack objectAtIndex:j] isKindOfClass:[NSString class]])
+                {
+                    [stack replaceObjectAtIndex:j 
+                                     withObject:[variableValues objectAtIndex:i]];
+                }
+            }
+            
+            [resultValues addObject:[NSNumber numberWithDouble:[self popOperandOffStack:stack]]];
+        }
+    }
+    
+    return resultValues;
+}
 
 @end

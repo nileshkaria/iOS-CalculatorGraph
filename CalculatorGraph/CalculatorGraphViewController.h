@@ -13,5 +13,7 @@
 //@property (nonatomic) NSMutableArray stack;
 
 @property (nonatomic, strong) id formula;
+@property (nonatomic, strong) id infix;
+@property (nonatomic, weak) IBOutlet UILabel *display;
 
 @end

@@ -189,6 +189,7 @@
 
 - (IBAction)generateGraph 
 {
+    [self enterPressed];
     [self performSegueWithIdentifier:@"DrawGraph" sender:self];
 }
 
@@ -198,6 +199,7 @@
     {
         //@NOTE - Fill initial model of CalculatorGraphViewController here.
         [segue.destinationViewController setFormula:[self.brain.formula mutableCopy]];
+        [segue.destinationViewController setInfix:[self.brain.infix mutableCopy]];
     }
 }
 

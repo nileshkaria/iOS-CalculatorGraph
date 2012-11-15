@@ -40,8 +40,11 @@
 + (void)        generateInfix:(NSMutableArray *)infixStackOutput
                 usingInfixStack:(NSMutableArray *)infixStack;
 
-+ (double)      runProgram:(id)program;
-+ (double)      runProgram:(id)program
++ (double)              runProgram:(id)program;
+
++ (double)              runProgram:(id)program
                 usingVariableValues:(NSMutableDictionary *)variableValues;
 
++ (NSMutableArray *)   runProgram:(id)program
+                       usingRange:(NSMutableArray *)variableValues;
 @end

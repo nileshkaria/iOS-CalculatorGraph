@@ -13,10 +13,14 @@
 
 @protocol GraphViewDataSource
 
-- (double)  functionValueForVariable:   (float)variable         forGraphView: (CalculatorGraphView *)sender;
 - (void)    storeScale:                 (float)scale            forGraphView: (CalculatorGraphView *)sender;  
 - (void)    storeAxisOrigin:            (CGPoint)axisOrigin     forGraphView: (CalculatorGraphView *) sender; 
 
+- (double)                  functionValueForVariable:   (float)variable         
+                                        forGraphView: (CalculatorGraphView *)sender;
+
+- (NSMutableArray *)  functionValuesForVariableArray:   (NSMutableArray *)variables
+                                        forGraphView: (CalculatorGraphView *)sender;
 @end
 
 @interface CalculatorGraphView : UIView

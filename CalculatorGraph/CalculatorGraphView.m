@@ -220,13 +220,52 @@
     [[UIColor greenColor] setStroke];
     CGContextMoveToPoint(context, prevPoint.x, prevPoint.y);
     
-    CGFloat increment = 1/[self contentScaleFactor];    
+    CGFloat increment = 1/[self contentScaleFactor];
     
     for (int x = self.bounds.origin.x; x <= self.bounds.origin.x + self.bounds.size.width; x += increment) 
     {
         currPoint.x = x;
         currPoint = [self convertPointToGraphCoordinate:currPoint];
         currPoint.y = [self.dataSource functionValueForVariable:currPoint.x forGraphView:self];
+        
+        NSLog(@"Graph x=%f", currPoint.x);
+        NSLog(@"Graph y=%f", currPoint.y);
+        
+        currPoint = [self convertPointToScreenCoordinate:currPoint];
+        
+        //Don't draw points which are not within bounds
+        if(currPoint.y == NAN || currPoint.y == INFINITY || currPoint.y == -INFINITY)
+            continue;
+        
+        NSLog(@"Screen x=%f", currPoint.x);
+        NSLog(@"Screen y=%f", currPoint.y);
+        
+        //NOTE - This does not work for examples like sin(x) when the axes span a large range 
+        //CGContextAddArcToPoint(context, prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, 2*M_PI);
+        
+        CGContextAddArc(context, currPoint.x, currPoint.y, increment/2.0, 0, 2*M_PI, YES);
+        
+        prevPoint = currPoint;
+    }
+    
+    CGContextStrokePath(context);
+    
+    /*
+    NSMutableArray * pointValues = [[NSMutableArray alloc] init];
+    for (int x = self.bounds.origin.x; x <= self.bounds.origin.x + self.bounds.size.width; x += increment) 
+    {
+        currPoint.x = x;
+        currPoint = [self convertPointToGraphCoordinate:currPoint];
+        
+        [pointValues addObject:[NSNumber numberWithDouble:currPoint.x] ];
+    }
+    
+    NSMutableArray * resultValues = [self.dataSource functionValuesForVariableArray:pointValues forGraphView:self];
+        
+    for (int y = 0; y < [resultValues count]; ++y) 
+    {
+        currPoint.x = [[pointValues objectAtIndex:y] doubleValue];
+        currPoint.y = [[resultValues objectAtIndex:y] doubleValue];
         
         NSLog(@"Graph x=%f", currPoint.x);
         NSLog(@"Graph y=%f", currPoint.y);
@@ -249,6 +288,7 @@
     }
     
     CGContextStrokePath(context);
+    */
     
 }
 
